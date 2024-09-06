@@ -32,7 +32,9 @@ jobs:
         echo "$DBT_PROFILE" > ~/.dbt/profiles.yml
 
     - name: Run dbt debug
-      run: dbt debug
+      run: |
+        cat /home/runner/.dbt/profiles.yml
+        dbt debug
 
     - name: Run dbt deps
       run: dbt deps
