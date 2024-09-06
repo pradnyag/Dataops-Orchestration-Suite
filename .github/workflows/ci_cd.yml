@@ -27,6 +27,8 @@ jobs:
         pip install dbt-snowflake
 
     - name: Run dbt debug
+      env:
+        DBT_PROFILE: ${{ secrets.DBT_PROFILE }}
       run: |
         mkdir -p /home/runner/.dbt
         echo "$DBT_PROFILE" > /home/runner/.dbt/profiles.yml
