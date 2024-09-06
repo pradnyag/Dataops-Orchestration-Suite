@@ -1,0 +1,57 @@
+name: CI/CD for dbt
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dbt_run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install dbt-snowflake
+
+    - name: Set up dbt profiles
+      run: |
+        mkdir -p ~/.dbt
+        echo "$DBT_PROFILE" > ~/.dbt/profiles.yml
+
+    - name: Run dbt debug
+      run: dbt debug
+
+    - name: Run dbt deps
+      run: dbt deps
+
+    - name: Run dbt seed
+      run: dbt seed
+
+    - name: Run dbt run
+      run: dbt run
+
+    - name: Run dbt test
+      run: dbt test
+
+    - name: Run dbt docs generate
+      run: dbt docs generate
+
+    - name: Upload dbt artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dbt_artifacts
+        path: target/
+
