@@ -1,0 +1,72 @@
+name: CI/CD for dbt
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dbt_run:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install dbt-snowflake
+    
+    - name: Set up dbt profiles.yml
+      run: |
+        mkdir -p ~/.dbt
+        echo "data_pipeline:" > ~/.dbt/profiles.yml
+        echo "  target: dev" >> ~/.dbt/profiles.yml
+        echo "  outputs:" >> ~/.dbt/profiles.yml
+        echo "    dev:" >> ~/.dbt/profiles.yml
+        echo "      type: snowflake" >> ~/.dbt/profiles.yml
+        echo "      account: ${{ secrets.SNOWFLAKE_ACCOUNT }}" >> ~/.dbt/profiles.yml
+        echo "      user: ${{ secrets.SNOWFLAKE_USER }}" >> ~/.dbt/profiles.yml
+        echo "      password: ${{ secrets.SNOWFLAKE_PASSWORD }}" >> ~/.dbt/profiles.yml
+        echo "      role: ${{ secrets.SNOWFLAKE_ROLE }}" >> ~/.dbt/profiles.yml
+        echo "      warehouse: ${{ secrets.SNOWFLAKE_WAREHOUSE }}" >> ~/.dbt/profiles.yml
+        echo "      database: ${{ secrets.SNOWFLAKE_DATABASE }}" >> ~/.dbt/profiles.yml
+        echo "      schema: ${{ secrets.SNOWFLAKE_SCHEMA }}" >> ~/.dbt/profiles.yml
+        echo "      threads: 4" >> ~/.dbt/profiles.yml
+        echo "      client_session_keep_alive: False" >> ~/.dbt/profiles.yml
+        echo "      query_tag: ci-cd" >> ~/.dbt/profiles.yml
+        cat ~/.dbt/profiles.yml
+
+    - name: Run dbt debug
+      run: dbt debug --profiles-dir ~/.dbt
+
+    - name: Run dbt deps
+      run: dbt deps
+
+    - name: Run dbt seed
+      run: dbt seed
+
+    - name: Run dbt run
+      run: dbt run
+
+    - name: Run dbt test
+      run: dbt test
+
+    - name: Run dbt docs generate
+      run: dbt docs generate
+
+    - name: Upload dbt artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: dbt_artifacts
+        path: target/
+
