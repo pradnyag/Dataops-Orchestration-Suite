@@ -29,7 +29,7 @@ jobs:
     - name: Set up dbt profiles.yml
       run: |
         mkdir -p ~/.dbt
-        echo "my_profile:" > ~/.dbt/profiles.yml
+        echo "data_pipeline:" > ~/.dbt/profiles.yml
         echo "  target: dev" >> ~/.dbt/profiles.yml
         echo "  outputs:" >> ~/.dbt/profiles.yml
         echo "    dev:" >> ~/.dbt/profiles.yml
@@ -44,15 +44,10 @@ jobs:
         echo "      threads: 4" >> ~/.dbt/profiles.yml
         echo "      client_session_keep_alive: False" >> ~/.dbt/profiles.yml
         echo "      query_tag: ci-cd" >> ~/.dbt/profiles.yml
+        cat ~/.dbt/profiles.yml
 
     - name: Run dbt debug
-      env:
-        DBT_PROFILE: ${{ secrets.DBT_PROFILE }}
-      run: |
-        # mkdir -p /home/runner/.dbt
-        # echo "$DBT_PROFILE" > /home/runner/.dbt/profiles.yml
-        # cat /home/runner/.dbt/profiles.yml
-        dbt debug --profiles-dir ~/.dbt
+      run: dbt debug --profiles-dir ~/.dbt
 
     - name: Run dbt deps
       run: dbt deps
