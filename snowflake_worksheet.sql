@@ -1,3 +1,5 @@
+-- This worksheet contains code for setting up db in snowflake and RBAC for secure access
+
 use role accountadmin;
 create warehouse if not exists dbt_wh with warehouse_size = 'x-small';
 
